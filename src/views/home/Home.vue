@@ -19,7 +19,6 @@
       :probe-type="3"
       @scroll="contentScroll"
       :pull-up-load="true"
-      @pullingUp="loadMore"
     >
       <home-swiper :banners="banners"></home-swiper>
       <recommend-view :recommends="recommends"></recommend-view>
@@ -91,7 +90,24 @@ export default {
     this.getHomeGoods("new");
     this.getHomeGoods("sell");
   },
+  mounted() {
+    // 3.监听item中图片加载完成
+    const refresh = this.debouce(this.$refs.scroll.refresh);
+    this.$bus.$on("itemImageLoad", () => {
+      refresh();
+    });
+  },
   methods: {
+    debouce(func, delay) {
+      let timer = null; 
+      // apply改变this的指向
+      return function (...args) {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+          func.apply(this, args);
+        }, delay);
+      };
+    },
     // 事件监听相关的方法
     tabClick(index) {
       // console.log(index);
@@ -140,8 +156,6 @@ export default {
         // 保存首页数据。把res的数据保存到lists，好好斟酌这个语法
         this.goods[type].list.push(...res.data.list);
         this.goods[type].page += 1;
-
-        this.$refs.scroll.finishPullUp();
       });
     },
   },
