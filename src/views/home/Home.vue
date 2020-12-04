@@ -18,6 +18,8 @@
       ref="scroll"
       :probe-type="3"
       @scroll="contentScroll"
+      :pull-up-load="true"
+      @pullingUp="loadMore"
     >
       <home-swiper :banners="banners"></home-swiper>
       <recommend-view :recommends="recommends"></recommend-view>
@@ -116,6 +118,11 @@ export default {
       //console.log(position);
       this.isShowBackTop = -position.y > 1000;
     },
+    // 上拉加载更多
+    loadMore() {
+      // console.log('上拉加载更多');
+      this.getHomeGoods(this.currentType);
+    },
 
     // 网络请求相关方法
     getHomeMultidata() {
@@ -133,6 +140,8 @@ export default {
         // 保存首页数据。把res的数据保存到lists，好好斟酌这个语法
         this.goods[type].list.push(...res.data.list);
         this.goods[type].page += 1;
+
+        this.$refs.scroll.finishPullUp();
       });
     },
   },

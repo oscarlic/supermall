@@ -16,6 +16,10 @@ export default {
       type: Number,
       default: 0,
     },
+    pullUpLoad: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
@@ -30,6 +34,7 @@ export default {
     this.scroll = new BScroll(this.$refs.wrapper, {
       click: true,
       probeType: this.probeType,
+      pullUpLoad: this.pullUpLoad,
     });
 
     // scrollTo为Better Scroll自带的一个函数，前面两个代表坐标，后面一个代表时间
@@ -40,11 +45,20 @@ export default {
       // console.log(position);
       this.$emit("scroll", position);
     });
+
+    // 3.监听上拉事件
+    this.scroll.on('pullingUp',() => {
+      this.$emit('pullingUp')
+    })
   },
   methods: {
     scrollTo(x, y, time = 300) {
       this.scroll.scrollTo(x, y, time);
     },
+    finishPullUp() {
+      // better-scroll自带的finishPullUp
+      this.scroll.finishPullUp()
+    }
   },
 };
 </script>
