@@ -41,13 +41,22 @@ export default {
     // this.scroll.scrollTo(0, 0, 500);
 
     // 2.监听滚动的位置
-    this.scroll.on("scroll", (position) => {
-      // console.log(position);
-      this.$emit("scroll", position);
-    });
+    if (this.probeType === 2 || this.probeType === 3) {
+      this.scroll.on("scroll", (position) => {
+        // console.log(position);
+        this.$emit("scroll", position);
+      });
+    }
+    // 3.监听滚动到底部
+    if (this.pullUpLoad) {
+      this.scroll.on("pullingUp", () => {
+        // console.log("监听滚动到底部");
+        this.$emit("pullingUp");
+      });
+    }
 
     // 3.监听上拉事件
-   /*  this.scroll.on("pullingUp", () => {
+    /*  this.scroll.on("pullingUp", () => {
       this.$emit("pullingUp");
     }); */
   },
@@ -61,13 +70,10 @@ export default {
       this.scroll && this.scroll.finishPullUp();
     },
     refresh() {
-      console.log('---');
-      this.scroll && this.scroll.refresh( )
-    }
+      this.scroll && this.scroll.refresh();
+    },
   },
 };
 </script>
 
-<style scoped>
-</style>
-
+<style scoped></style>
