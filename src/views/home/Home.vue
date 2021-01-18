@@ -13,6 +13,14 @@
       </swiper-item>
     </swiper> -->
 
+    <!-- 复制粘贴大法，造成tabControl吸顶效果 -->
+    <tab-control
+      :titles="['流行', '新款', '精选']"
+      @tabClick="tabClick"
+      ref="tabControl1"
+      class="tab-control"
+      v-show="isTabFixed"
+    ></tab-control>
     <scroll
       class="content"
       ref="scroll"
@@ -21,13 +29,16 @@
       :pull-up-load="true"
       @pullingUp="loadMore"
     >
-      <home-swiper :banners="banners"></home-swiper>
+      <home-swiper
+        :banners="banners"
+        @swiperImageLoad="swiperImageLoad"
+      ></home-swiper>
       <recommend-view :recommends="recommends"></recommend-view>
       <feature-view></feature-view>
       <tab-control
-        class="tab-control"
         :titles="['流行', '新款', '精选']"
         @tabClick="tabClick"
+        ref="tabControl2"
       ></tab-control>
       <goods-list :goods="showGoods"></goods-list>
     </scroll>
@@ -77,6 +88,8 @@ export default {
       },
       currentType: "pop",
       isShowBackTop: false,
+      tabOffsetTop: 0,
+      isTabFixed: false,
     };
   },
   computed: {
@@ -93,7 +106,7 @@ export default {
     this.getHomeGoods("sell");
   },
   mounted() {
-    // 3.监听item中图片加载完成
+    // 监听item中图片加载完成
     const refresh = debounce(this.$refs.scroll.refresh);
     this.$bus.$on("itemImageLoad", () => {
       refresh();
@@ -114,6 +127,8 @@ export default {
           this.currentType = "sell";
           break;
       }
+      this.$refs.tabControl1.currentIndex = index;
+      this.$refs.tabControl2.currentIndex = index;
     },
     // 返回顶部
     backClick() {
@@ -124,13 +139,23 @@ export default {
     // back-top的显示和隐藏
     contentScroll(position) {
       //console.log(position);
+      // 1.判断BacpTop是否显示
       this.isShowBackTop = -position.y > 1000;
+
+      // 2.决定tabControl是否吸顶（position：fixed）
+      this.isTabFixed = -position.y > this.tabOffsetTop;
     },
     // 上拉加载更多
     loadMore() {
       // console.log('上拉加载更多');
       this.getHomeGoods(this.currentType);
-    },    
+    },
+
+    // 获取tabControl的offsetTop
+    // 所有的组件都有一个属性$el，用于获取组件中的元素
+    swiperImageLoad() {
+      this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop;
+    },
 
     // 网络请求相关方法
     getHomeMultidata() {
@@ -149,7 +174,7 @@ export default {
         this.goods[type].list.push(...res.data.list);
         this.goods[type].page += 1;
         // 完成上拉加载更多
-        this.$refs.scroll.finishPullUp()
+        this.$refs.scroll.finishPullUp();
       });
     },
   },
@@ -159,24 +184,19 @@ export default {
 <style scoped>
 /* vh：视口高度 */
 #home {
-  padding-top: 44px;
+  
   height: 100vh;
   position: relative;
 }
 .home-nav {
   background-color: var(--color-tint);
   color: white;
-
-  position: fixed;
+  /* 在使用浏览器原生滚动时，为了让导航不跟随一起滚动 */
+  /* position: fixed;
   left: 0;
   right: 0;
   top: 0;
-  z-index: 9;
-}
-.tab-control {
-  position: sticky;
-  top: 44px;
-  z-index: 9;
+  z-index: 9; */
 }
 .content {
   /* height: 300px; */
@@ -193,4 +213,8 @@ export default {
   overflow: hidden;
   margin-top: 44px;
 } */
+.tab-control{
+  position: relative;
+  z-index: 9;
+}
 </style>
